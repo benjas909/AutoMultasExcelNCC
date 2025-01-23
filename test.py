@@ -12,7 +12,6 @@ def XLSXHandling(filename):
 
     contents = []
 
-    
     # Guarda contenidos de hoja 
     for row in sheet.iter_rows():
         contents.append(row)
@@ -49,7 +48,6 @@ def XLSXHandling(filename):
                 sheet[f"P{i}"] = f'=IF(OR(ISTEXT(N{i}), ISTEXT(K{i})), "No Disponible", N{i}-K{i})'
                 
                 print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
-
         i += 1
 
     for r in sheet[ "A2:V154" ]:
@@ -72,9 +70,6 @@ def XLSXHandling(filename):
     sheet.column_dimensions["N"].width = 20
     sheet.column_dimensions["O"].width = 15
     sheet.column_dimensions["P"].width = 15
-    
-
-    # sheet["K"].number_format = 
 
     workbook.save(filename="output_test.xlsx")
 
@@ -98,11 +93,11 @@ def selectFile():
     showinfo(title="Listo", message="Archivo guardado")
 
     
-
 def main():
     window = tk.Tk()
 
     window.resizable(False, False)
+    window.title("AutoMultas")
     window.geometry("300x300")
     openButton = ttk.Button(window, text="Abrir un archivo", command=selectFile)
     openButton.pack(expand=True)
