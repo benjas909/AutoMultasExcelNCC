@@ -21,19 +21,23 @@ def XLSXHandling(filename):
         sheet[f"C{i}"] = str(row[2].value)
         numList = re.findall(r"\d{6}", row[2].value)
 
+        # Si ATM tiene por lo menos un ticket
         if len(numList) > 0:
-            sheet[f"C{i}"] = "2024 " + numList[0]
+            sheet[f"C{i}"] = "2024 " + numList[0] # Reescribe número de ticket con formato correcto
             sheet[f"K{i}"] = f'=VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE)'
             sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"Vacío",VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE))'
             sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"Vacío",VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE))'
             sheet[f"O{i}"] = f'=IF(OR(ISTEXT(M{i}), ISTEXT(K{i})), "No Disponible", M{i}-K{i})'
             sheet[f"P{i}"] = f'=IF(OR(ISTEXT(N{i}), ISTEXT(K{i})), "No Disponible", N{i}-K{i})'
 
+        # Si ATM tiene más de un ticket
         if len(numList) > 1:
+            # Guarda datos de ATM actual
             ATM = row[0].value
             Comuna = row[1].value
             Apertura = row[10].value
 
+            # Recorre lista de tickets, desde el segundo ticket
             for item in numList[1:]:
                 newNum = f"2024 {item}"
                 sheet.insert_rows(idx= i + 1)
@@ -50,19 +54,23 @@ def XLSXHandling(filename):
                 print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
         i += 1
 
+    # Aplica estilos a la hoja
     for r in sheet[ "A2:V154" ]:
         for cell in r:
             cell.font = Font(name = "Calibri", size = 9)
             cell.alignment = Alignment(horizontal = "center", vertical = "center")
 
+    # Aplica formato de fecha a columnas correspondientes
     for r in sheet["J1:N154"]:
         for cell in r:
             cell.number_format = "dd/mm/yyyy h:mm"
 
+    # Aplica formato de hora a columnas correspondientes
     for r in sheet["O1:P154"]:
         for cell in r:
             cell.number_format = "h:mm:ss"
 
+    # Aplica ancho de columna
     sheet.column_dimensions["J"].width = 20
     sheet.column_dimensions["K"].width = 20
     sheet.column_dimensions["L"].width = 20
@@ -74,6 +82,7 @@ def XLSXHandling(filename):
     workbook.save(filename="output_test.xlsx")
 
 
+# Ventana de selección de archivo
 def selectFile():
     filetypes = (
         ('Excel spreadsheets', '.xlsx'),
@@ -94,18 +103,17 @@ def selectFile():
 
     
 def main():
-    window = tk.Tk()
 
+    # Ventana principal
+    window = tk.Tk()
     window.resizable(False, False)
     window.title("AutoMultas")
     window.geometry("300x300")
     openButton = ttk.Button(window, text="Abrir un archivo", command=selectFile)
     openButton.pack(expand=True)
 
-
     window.mainloop()
-
-
+    
 
 if __name__ == "__main__":
     main()
