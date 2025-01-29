@@ -19,6 +19,10 @@ def XLSXHandling(filename):
     i = 1
     addedCells = 0
     for row in contents:
+
+        if (row[0].value is None):
+            break
+
         sheet[f"C{i}"] = str(row[2].value)
         numList = re.findall(r"\d{6}", row[2].value)
 
@@ -65,6 +69,7 @@ def XLSXHandling(filename):
 
         i += 1
 
+    sheet[f"I{154 + addedCells}"] = f'=SUM(I2:I{151 + addedCells})'
 
 
     # Aplica estilos a la hoja
