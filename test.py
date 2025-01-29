@@ -1,6 +1,6 @@
 import openpyxl, re
 import tkinter as tk
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.styles import Font, Alignment
 from tkinter import ttk
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
@@ -17,6 +17,7 @@ def XLSXHandling(filename):
         contents.append(row)
 
     i = 1
+    addedCells = 0
     for row in contents:
         sheet[f"C{i}"] = str(row[2].value)
         numList = re.findall(r"\d{6}", row[2].value)
@@ -24,49 +25,61 @@ def XLSXHandling(filename):
         # Si ATM tiene por lo menos un ticket
         if len(numList) > 0:
             sheet[f"C{i}"] = "2024 " + numList[0] # Reescribe número de ticket con formato correcto
-            sheet[f"K{i}"] = f'=VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE)'
-            sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"Vacío",VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE))'
-            sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"Vacío",VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE))'
+            sheet[f"K{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE)), "No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE))'
+            sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)))'
+            sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)))'
             sheet[f"O{i}"] = f'=IF(OR(ISTEXT(M{i}), ISTEXT(K{i})), "No Disponible", M{i}-K{i})'
             sheet[f"P{i}"] = f'=IF(OR(ISTEXT(N{i}), ISTEXT(K{i})), "No Disponible", N{i}-K{i})'
 
-        # Si ATM tiene más de un ticket
-        if len(numList) > 1:
-            # Guarda datos de ATM actual
-            ATM = row[0].value
-            Comuna = row[1].value
-            Apertura = row[10].value
+            # Si ATM tiene más de un ticket
+            if len(numList) > 1:
+                # Guarda datos de ATM actual
+                ATM = row[0].value
+                Comuna = row[1].value
+                Apertura = row[10].value
 
-            # Recorre lista de tickets, desde el segundo ticket
-            for item in numList[1:]:
-                newNum = f"2024 {item}"
-                sheet.insert_rows(idx= i + 1)
-                i += 1
-                sheet[f"A{i}"] = ATM
-                sheet[f"B{i}"] = Comuna
-                sheet[f"C{i}"] = newNum
-                sheet[f"K{i}"] = f'=VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE)'
-                sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"Vacío",VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE))'
-                sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"Vacío",VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE))'
-                sheet[f"O{i}"] = f'=IF(OR(ISTEXT(M{i}), ISTEXT(K{i})), "No Disponible", M{i}-K{i})'
-                sheet[f"P{i}"] = f'=IF(OR(ISTEXT(N{i}), ISTEXT(K{i})), "No Disponible", N{i}-K{i})'
-                
-                print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
+                # Recorre lista de tickets, desde el segundo ticket
+                for item in numList[1:]:
+                    newNum = f"2024 {item}"
+                    sheet.insert_rows(idx= i + 1)
+                    addedCells += 1
+                    i += 1
+                    sheet[f"A{i}"] = ATM
+                    sheet[f"B{i}"] = Comuna
+                    sheet[f"C{i}"] = newNum
+                    sheet[f"K{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE)), "No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE))'
+                    sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)))'
+                    sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)))'
+                    sheet[f"O{i}"] = f'=IF(OR(ISTEXT(M{i}), ISTEXT(K{i})), "No Disponible", M{i}-K{i})'
+                    sheet[f"P{i}"] = f'=IF(OR(ISTEXT(N{i}), ISTEXT(K{i})), "No Disponible", N{i}-K{i})'
+                    
+                    print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
+
+        elif(len(numList) == 0 and i != 1):
+            sheet[f"K{i}"] = "No Disponible"
+            sheet[f"M{i}"] = "No Disponible"
+            sheet[f"N{i}"] = "No Disponible"
+            sheet[f"O{i}"] = "No Disponible"
+            sheet[f"P{i}"] = "No Disponible"
+
+
         i += 1
 
+
+
     # Aplica estilos a la hoja
-    for r in sheet[ "A2:V154" ]:
+    for r in sheet[ f"A2:V{154 + addedCells}" ]:
         for cell in r:
             cell.font = Font(name = "Calibri", size = 9)
             cell.alignment = Alignment(horizontal = "center", vertical = "center")
 
     # Aplica formato de fecha a columnas correspondientes
-    for r in sheet["J1:N154"]:
+    for r in sheet[ f"J1:N{154 + addedCells}" ]:
         for cell in r:
             cell.number_format = "dd/mm/yyyy h:mm"
 
     # Aplica formato de hora a columnas correspondientes
-    for r in sheet["O1:P154"]:
+    for r in sheet[ f"O1:P{154 + addedCells}" ]:
         for cell in r:
             cell.number_format = "h:mm:ss"
 
@@ -113,7 +126,7 @@ def main():
     openButton.pack(expand=True)
 
     window.mainloop()
-    
+
 
 if __name__ == "__main__":
     main()
