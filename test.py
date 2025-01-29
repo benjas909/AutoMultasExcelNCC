@@ -8,7 +8,12 @@ from tkinter.messagebox import showinfo
 def XLSXHandling(filename):
     # Abrir archivo excel de entrada
     workbook = openpyxl.load_workbook(filename=filename)
+    ticketsSheet = workbook["Tickets"]
+    tickMax = ticketsSheet.max_row
+    print(tickMax)
     sheet = workbook["Item 12"] # Selección de hoja
+    lastTicket = sheet.max_row - 3
+    print(lastTicket)
 
     contents = []
 
@@ -29,11 +34,11 @@ def XLSXHandling(filename):
         # Si ATM tiene por lo menos un ticket
         if len(numList) > 0:
             sheet[f"C{i}"] = "2024 " + numList[0] # Reescribe número de ticket con formato correcto
-            sheet[f"K{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE)), "No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE))'
-            sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)))'
-            sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)))'
-            sheet[f"O{i}"] = f'=IF(OR(ISTEXT(M{i}), ISTEXT(K{i})), "No Disponible", M{i}-K{i})'
-            sheet[f"P{i}"] = f'=IF(OR(ISTEXT(N{i}), ISTEXT(K{i})), "No Disponible", N{i}-K{i})'
+            sheet[f"K{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},22,FALSE)), "No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},22,FALSE))'
+            sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},23,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},23,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},23,FALSE)))'
+            sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)))'
+            sheet[f"O{i}"] = f'=IF(ISERR(M{i}-K{i}), "No Disponible", M{i}-K{i})'
+            sheet[f"P{i}"] = f'=IF(ISERR(N{i}-K{i}), "No Disponible", N{i}-K{i})'
 
             # Si ATM tiene más de un ticket
             if len(numList) > 1:
@@ -51,14 +56,15 @@ def XLSXHandling(filename):
                     sheet[f"A{i}"] = ATM
                     sheet[f"B{i}"] = Comuna
                     sheet[f"C{i}"] = newNum
-                    sheet[f"K{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE)), "No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,22,FALSE))'
-                    sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,23,FALSE)))'
-                    sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X$410,24,FALSE)))'
-                    sheet[f"O{i}"] = f'=IF(OR(ISTEXT(M{i}), ISTEXT(K{i})), "No Disponible", M{i}-K{i})'
-                    sheet[f"P{i}"] = f'=IF(OR(ISTEXT(N{i}), ISTEXT(K{i})), "No Disponible", N{i}-K{i})'
+                    sheet[f"K{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},22,FALSE)), "No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},22,FALSE))'
+                    sheet[f"M{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},23,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},23,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},23,FALSE)))'
+                    sheet[f"N{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)))'
+                    sheet[f"O{i}"] = f'=IF(ISERR(M{i}-K{i}), "No Disponible", M{i}-K{i})'
+                    sheet[f"P{i}"] = f'=IF(ISERR(N{i}-K{i}), "No Disponible", N{i}-K{i})'
                     
                     print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
 
+        # ATM sin número de ticket
         elif(len(numList) == 0 and i != 1):
             sheet[f"K{i}"] = "No Disponible"
             sheet[f"M{i}"] = "No Disponible"
@@ -69,22 +75,22 @@ def XLSXHandling(filename):
 
         i += 1
 
-    sheet[f"I{154 + addedCells}"] = f'=SUM(I2:I{151 + addedCells})'
+    sheet[f"I{lastTicket + addedCells + 3}"] = f'=SUM(I2:I{lastTicket + addedCells})'
 
 
     # Aplica estilos a la hoja
-    for r in sheet[ f"A2:V{154 + addedCells}" ]:
+    for r in sheet[ f"A2:V{lastTicket + addedCells + 3}" ]:
         for cell in r:
             cell.font = Font(name = "Calibri", size = 9)
             cell.alignment = Alignment(horizontal = "center", vertical = "center")
 
     # Aplica formato de fecha a columnas correspondientes
-    for r in sheet[ f"J1:N{154 + addedCells}" ]:
+    for r in sheet[ f"J1:N{lastTicket + addedCells + 3}" ]:
         for cell in r:
             cell.number_format = "dd/mm/yyyy h:mm"
 
     # Aplica formato de hora a columnas correspondientes
-    for r in sheet[ f"O1:P{154 + addedCells}" ]:
+    for r in sheet[ f"O1:P{lastTicket + addedCells + 3}" ]:
         for cell in r:
             cell.number_format = "h:mm:ss"
 
@@ -97,7 +103,7 @@ def XLSXHandling(filename):
     sheet.column_dimensions["O"].width = 15
     sheet.column_dimensions["P"].width = 15
 
-    workbook.save(filename="output_test.xlsx")
+    workbook.save(filename="Junio2024_test.xlsx")
 
 
 # Ventana de selección de archivo
