@@ -3,11 +3,22 @@ import tkinter as tk
 from openpyxl.styles import Font, Alignment
 from tkinter import ttk
 from tkinter import filedialog as fd
+# from tkinter.filedialog import asksaveasfile
 from tkinter.messagebox import showinfo
+from tkinter import StringVar
+from tkinter import simpledialog
+import os
 
-def XLSXHandling(filename):
+
+# fd.ask
+
+DEFAULT_DIR = "."
+
+# inputPath = StringVar()
+
+def XLSXHandling(inFilename, outFilename):
     # Abrir archivo excel de entrada
-    workbook = openpyxl.load_workbook(filename=filename)
+    workbook = openpyxl.load_workbook(filename=inFilename)
     ticketsSheet = workbook["Tickets"]
     tickMax = ticketsSheet.max_row
     print(tickMax)
@@ -103,41 +114,99 @@ def XLSXHandling(filename):
     sheet.column_dimensions["O"].width = 15
     sheet.column_dimensions["P"].width = 15
 
-    workbook.save(filename="Junio2024_test.xlsx")
+    workbook.save(filename=outFilename)
+    showinfo(title="Listo", message="Archivo guardado")
+
 
 
 # Ventana de selección de archivo
-def selectFile():
+def selectInputFile():
+
+    global inputFilename
     filetypes = (
-        ('Excel spreadsheets', '.xlsx'),
+        ('Excel spreadsheets', '*.xlsx'),
         ('All files', '*.*')
     )
 
-    filename = fd.askopenfilename(
+    inputFilename = fd.askopenfilename(
         title = "Abrir archivo",
         initialdir="/",
         filetypes=filetypes
     )
 
-    showinfo(title="Archivo seleccionado", message=filename)
+    if inputFilename:
+        showinfo(title="Archivo seleccionado", message=inputFilename)
+        if hasattr(window, "label_infile"):
+            window.label_infile.config(text="Archivo de entrada: " + inputFilename)
+    else:
+        showinfo(title="Error", message="No se ha seleccionado ningún archivo")
+        
+    # inputPath.set(filename)
 
-    XLSXHandling(filename)
+    # XLSXHandling(filename)
 
-    showinfo(title="Listo", message="Archivo guardado")
+    # showinfo(title="Listo", message="Archivo guardado")
 
     
-def main():
 
-    # Ventana principal
-    window = tk.Tk()
-    window.resizable(False, False)
-    window.title("AutoMultas")
-    window.geometry("300x300")
-    openButton = ttk.Button(window, text="Abrir un archivo", command=selectFile)
-    openButton.pack(expand=True)
+def saveAs() :
+    global inputFilename, outputFilename
 
-    window.mainloop()
+    if not inputFilename:
+        showinfo(title="Error", message="No se ha seleccionado un archivo de entrada.")
+        return
+
+    baseName = os.path.splitext(os.path.basename(inputFilename))[0]
+    print(baseName)
+
+    defaultName = f"{baseName}_processed.xlsx"
+
+    filetypes = (
+        ("Excel Spreadsheets", "*.xlsx"), 
+        ("All Files", "*.*")
+    )
+
+    outputFilename = fd.asksaveasfilename(title = "Guardar como", defaultextension = ".xlsx",
+     initialfile = defaultName, initialdir = DEFAULT_DIR, filetypes = filetypes)
+    
+    if outputFilename:
+        showinfo(title="", message=outputFilename)
+        if hasattr(window, "label_outfile"):
+            window.label_outfile.config(text="Nombre de salida: " + outputFilename)
+        XLSXHandling(inputFilename, outputFilename)
+    else:
+        showinfo(title="Error", message="No se ha seleccionado un nombre de salida")
 
 
-if __name__ == "__main__":
-    main()
+
+
+# Ventana principal
+window = tk.Tk()
+window.resizable(False, False)
+window.title("AutoMultas")
+window.geometry("300x300")
+# frame = tk.Frame(master=window, width=300, height=250, border=2, background= "yellow").pack()
+
+inputFilename = ""
+outputFilename = ""
+
+window.label_infile = tk.Label(window, text="No se ha seleccionado un archivo de entrada")
+window.label_infile.pack()
+openButton = ttk.Button(master=window, text="Abrir un archivo", command=selectInputFile)
+openButton.pack(pady=10)
+# inputLabel = ttk.Label(master=window, text=inputFilename).pack()
+
+window.label_outfile = tk.Label(window, text="No se ha seleccionado un nombre de archivo de salida")
+window.label_outfile.pack()
+saveButton = ttk.Button(master=window, text = "Guardar archivo", command=saveAs)
+saveButton.pack(pady=10)
+# saveLabel = ttk.Label(master=window, text=outputFilename).pack()
+
+
+# XLSXHandling(inputFilename)
+
+
+window.mainloop()
+print(inputFilename)
+
+
