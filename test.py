@@ -6,6 +6,7 @@ from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 from copy import copy
 import os
+import itertools
 
 import openpyxl.styles
 
@@ -116,23 +117,37 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     sheet["L1"].font = headerFont
     sheet["L1"].fill = headerFill
 
-    sheet["M1"] = "Mejor fecha"
+    sheet["M1"] = "Mejor Fecha"
     sheet["M1"].font = headerFont
     sheet["M1"].fill = headerFill
 
-    sheet["N1"] = "Tiempo resolución"
+    sheet["N1"] = "Tiempo Resolución"
     sheet["N1"].font = headerFont
     sheet["N1"].fill = headerFill
 
-    sheet["O1"] = "Tiempo cierre"
+    sheet["O1"] = "Tiempo Cierre"
     sheet["O1"].font = headerFont
     sheet["O1"].fill = headerFill
 
-    sheet["P1"] = "HH Tiempo NC"
+    sheet["P1"] = "Mejor Tiempo NC"
     sheet["P1"].font = headerFont
-    sheet["P1"].fill = headerFill    
+    sheet["P1"].fill = headerFill  
 
+    sheet["Q1"] = "Solicitud Apertura ATM"
+    sheet["Q1"].font = headerFont
+    sheet["Q1"].fill = headerFill
 
+    sheet["R1"] = "Disponibilidad Apertura ATM"
+    sheet["R1"].font = headerFont
+    sheet["R1"].fill = headerFill
+
+    sheet["S1"] = "Tiempo Descuento"
+    sheet["S1"].font = headerFont
+    sheet["S1"].fill = headerFill
+
+    sheet["T1"] = "Tiempo Indisponibilidad GTD"
+    sheet["T1"].font = headerFont
+    sheet["T1"].fill = headerFill
 
 
     i = 1
@@ -153,7 +168,9 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
             sheet[f"L{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)))'
             sheet[f"N{i}"] = f'=IF(ISERR(K{i}-J{i}), "No Disponible", K{i}-J{i})'
             sheet[f"O{i}"] = f'=IF(ISERR(L{i}-J{i}), "No Disponible", L{i}-J{i})'
-            sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",N{i}),IF(ISTEXT(O{i}),N{i},MIN(N{i},O{i})))'
+            sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",O{i}),IF(ISTEXT(O{i}),N{i},MIN(N{i},O{i})))'
+            sheet[f"S{i}"] = f'=R{i}-Q{i}'
+            sheet[f"T{i}"] = f'=IF(ISERR(P{i}-S{i}), "No Disponible", P{i}-S{i})'
 
             # Si ATM tiene más de un ticket
             if len(numList) > 1:
@@ -176,7 +193,9 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
                     sheet[f"L{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)))'
                     sheet[f"N{i}"] = f'=IF(ISERR(K{i}-J{i}), "No Disponible", K{i}-J{i})'
                     sheet[f"O{i}"] = f'=IF(ISERR(L{i}-J{i}), "No Disponible", L{i}-J{i})'
-                    sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",N{i}),IF(ISTEXT(O{i}),N{i},MIN(N{i},O{i})))'
+                    sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",O{i}),IF(ISTEXT(O{i}),N{i},MIN(N{i},O{i})))'
+                    sheet[f"S{i}"] = f'=R{i}-Q{i}'
+                    sheet[f"T{i}"] = f'=IF(ISERR(P{i}-S{i}), "No Disponible", P{i}-S{i})'
 
                     
                     print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
@@ -195,6 +214,14 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     sheet[f"I{lastTicket + addedCells + 3}"] = f'=SUM(I2:I{lastTicket + addedCells})'
 
 
+    dateCells1 = sheet[ f'J1:M{lastTicket + addedCells + 3}' ]
+    dateCells2 = sheet[ f'Q1:R{lastTicket + addedCells + 3}' ]
+    dateCellsJoin = [dateCells1, dateCells2]
+
+    timeCells1 = sheet[ f"N1:P{lastTicket + addedCells + 3}" ]
+    timeCells2 = sheet[ f"S1:U{lastTicket + addedCells + 3}" ]
+    timeCellsJoin = [timeCells1, timeCells2]
+
     # Aplica estilos a la hoja
     for r in sheet[ f"A2:V{lastTicket + addedCells + 3}" ]:
         for cell in r:
@@ -202,12 +229,12 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
             cell.alignment = Alignment(horizontal = "center", vertical = "center")
 
     # Aplica formato de fecha a columnas correspondientes
-    for r in sheet[ f"J1:M{lastTicket + addedCells + 3}" ]:
+    for r in itertools.chain(*dateCellsJoin):
         for cell in r:
             cell.number_format = "dd/mm/yyyy h:mm"
 
     # Aplica formato de hora a columnas correspondientes
-    for r in sheet[ f"N1:P{lastTicket + addedCells + 3}" ]:
+    for r in itertools.chain(*timeCellsJoin):
         for cell in r:
             cell.number_format = "[h]:mm:ss"
 
@@ -218,11 +245,14 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     sheet.column_dimensions["M"].width = 20
     sheet.column_dimensions["N"].width = 15
     sheet.column_dimensions["O"].width = 15
-    sheet.column_dimensions["P"].width = 15
+    sheet.column_dimensions["P"].width = 20
+    sheet.column_dimensions["Q"].width = 25
+    sheet.column_dimensions["R"].width = 25
+    sheet.column_dimensions["S"].width = 15
+    sheet.column_dimensions["T"].width = 25
 
     workbook.save(filename=outFilename)
     showinfo(title="Listo", message="Archivo guardado")
-
 
 
 # Ventana de selección de archivo
@@ -260,14 +290,6 @@ def selectInputFile(inType):
             else:
                 showinfo(title = "Error", message = "No se ha seleccionado un archivo de tickets")
 
-        
-    # inputPath.set(filename)
-
-    # XLSXHandling(filename)
-
-    # showinfo(title="Listo", message="Archivo guardado")
-
-    
 
 def saveAs() :
     global inputFilename, outputFilename
@@ -299,7 +321,6 @@ def saveAs() :
 
 
 
-
 # Ventana principal
 window = tk.Tk()
 window.resizable(False, False)
@@ -324,7 +345,6 @@ window.label_tickfile.pack()
 importButton = ttk.Button(master=impFrame, text="Abrir archivo de tickets", command= lambda: selectInputFile("tickets"), state="disabled")
 importButton.pack(padx=10, pady=5)
 
-
 openFrame = tk.Frame(master=window, width=450, height=100, bd=4, relief=tk.RAISED)
 openFrame.pack(pady=5)
 
@@ -332,9 +352,6 @@ window.label_infile = tk.Label(openFrame, text="No se ha seleccionado un archivo
 window.label_infile.pack()
 openButton = ttk.Button(master=openFrame, text="Abrir un archivo", command= lambda: selectInputFile("input"))
 openButton.pack(pady=10)
-
-# if check.get() == 1:
-#     openButton.config(state="normal")
 
 saveFrame = tk.Frame(master=window, width=450, height=100, bd=4, relief=tk.RAISED)
 saveFrame.pack()
