@@ -129,7 +129,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     sheet["O1"].font = headerFont
     sheet["O1"].fill = headerFill
 
-    sheet["P1"] = "Mejor Tiempo NC"
+    sheet["P1"] = "Mejor Tiempo"
     sheet["P1"].font = headerFont
     sheet["P1"].fill = headerFill  
 
@@ -148,6 +148,10 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     sheet["T1"] = "Tiempo Indisponibilidad GTD"
     sheet["T1"].font = headerFont
     sheet["T1"].fill = headerFill
+
+    sheet["U1"] = "Responsable"
+    sheet["U1"].font = headerFont
+    sheet["U1"].fill = headerFill
 
 
     i = 1
@@ -171,6 +175,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
             sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",O{i}),IF(ISTEXT(O{i}),N{i},MIN(N{i},O{i})))'
             sheet[f"S{i}"] = f'=R{i}-Q{i}'
             sheet[f"T{i}"] = f'=IF(ISERR(P{i}-S{i}), "No Disponible", P{i}-S{i})'
+            sheet[f"U{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE)), "No Disponible", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE))'
 
             # Si ATM tiene más de un ticket
             if len(numList) > 1:
@@ -196,6 +201,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
                     sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",O{i}),IF(ISTEXT(O{i}),N{i},MIN(N{i},O{i})))'
                     sheet[f"S{i}"] = f'=R{i}-Q{i}'
                     sheet[f"T{i}"] = f'=IF(ISERR(P{i}-S{i}), "No Disponible", P{i}-S{i})'
+                    sheet[f"U{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE)), "No Disponible", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE))'
 
                     
                     print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
@@ -250,6 +256,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     sheet.column_dimensions["R"].width = 25
     sheet.column_dimensions["S"].width = 15
     sheet.column_dimensions["T"].width = 25
+    sheet.column_dimensions["U"].width = 15
 
     workbook.save(filename=outFilename)
     showinfo(title="Listo", message="Archivo guardado")
@@ -277,6 +284,7 @@ def selectInputFile(inType):
                 window.label_infile.config(text="Archivo de entrada: " + inputFilename)
         else:
             showinfo(title="Error", message="No se ha seleccionado ningún archivo")
+
     elif (inType == "tickets"):
         ticketsFilename = fd.askopenfilename(
             title = "Abrir archivo de tickets",
