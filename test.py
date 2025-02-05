@@ -11,6 +11,7 @@ import itertools
 import openpyxl.styles
 
 DEFAULT_DIR = "."
+ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 def activator():
@@ -100,59 +101,30 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     for row in sheet.iter_rows():
         contents.append(row)
 
-
     cyan = openpyxl.styles.colors.Color(rgb="0000b0F0")
     headerFont = Font(name="Calibri", size=9, bold=True, color="00FFFFFF")
     headerFill = PatternFill(start_color=cyan, end_color=cyan, fill_type="solid")
+    centerAlign = Alignment(horizontal="center", vertical="center")
 
     sheet["J1"] = "Apertura"
-    sheet["J1"].font = headerFont
-    sheet["J1"].fill = headerFill
-
     sheet["K1"] = "Resuelto"
-    sheet["K1"].font = headerFont
-    sheet["K1"].fill = headerFill
-
     sheet["L1"] = "Cerrado"
-    sheet["L1"].font = headerFont
-    sheet["L1"].fill = headerFill
-
     sheet["M1"] = "Mejor Fecha"
-    sheet["M1"].font = headerFont
-    sheet["M1"].fill = headerFill
-
     sheet["N1"] = "Tiempo Resolución"
-    sheet["N1"].font = headerFont
-    sheet["N1"].fill = headerFill
-
     sheet["O1"] = "Tiempo Cierre"
-    sheet["O1"].font = headerFont
-    sheet["O1"].fill = headerFill
-
     sheet["P1"] = "Mejor Tiempo"
-    sheet["P1"].font = headerFont
-    sheet["P1"].fill = headerFill  
-
     sheet["Q1"] = "Solicitud Apertura ATM"
-    sheet["Q1"].font = headerFont
-    sheet["Q1"].fill = headerFill
-
     sheet["R1"] = "Disponibilidad Apertura ATM"
-    sheet["R1"].font = headerFont
-    sheet["R1"].fill = headerFill
-
     sheet["S1"] = "Tiempo Descuento"
-    sheet["S1"].font = headerFont
-    sheet["S1"].fill = headerFill
-
     sheet["T1"] = "Tiempo Indisponibilidad GTD"
-    sheet["T1"].font = headerFont
-    sheet["T1"].fill = headerFill
-
     sheet["U1"] = "Responsable"
-    sheet["U1"].font = headerFont
-    sheet["U1"].fill = headerFill
 
+    for letter in ALPHABET:
+        if letter > 'I' and letter < 'V':
+            sheet[f"{letter}1"].fill = headerFill
+            
+        sheet[f"{letter}1"].font = headerFont
+        sheet[f"{letter}1"].alignment = centerAlign
 
     i = 1
     addedCells = 0
@@ -172,7 +144,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
             sheet[f"L{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)))'
             sheet[f"N{i}"] = f'=IF(ISERR(K{i}-J{i}), "No Disponible", K{i}-J{i})'
             sheet[f"O{i}"] = f'=IF(ISERR(L{i}-J{i}), "No Disponible", L{i}-J{i})'
-            sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",O{i}),IF(ISTEXT(O{i}),N{i},MIN(N{i},O{i})))'
+            sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",O{i}),IF(ISTEXT(O{i}),N{i},MIN(M{i}, N{i},O{i})))'
             sheet[f"S{i}"] = f'=R{i}-Q{i}'
             sheet[f"T{i}"] = f'=IF(ISERR(P{i}-S{i}), "No Disponible", P{i}-S{i})'
             sheet[f"U{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE)), "No Disponible", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE))'
@@ -182,7 +154,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
                 # Guarda datos de ATM actual
                 ATM = row[0].value
                 Comuna = row[1].value
-                Apertura = row[10].value
+                # Apertura = row[10].value
 
                 # Recorre lista de tickets, desde el segundo ticket
                 for item in numList[1:]:
@@ -198,13 +170,13 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
                     sheet[f"L{i}"] = f'=IF(ISBLANK(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"Vacío",IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)),"No Encontrado", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},24,FALSE)))'
                     sheet[f"N{i}"] = f'=IF(ISERR(K{i}-J{i}), "No Disponible", K{i}-J{i})'
                     sheet[f"O{i}"] = f'=IF(ISERR(L{i}-J{i}), "No Disponible", L{i}-J{i})'
-                    sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",O{i}),IF(ISTEXT(O{i}),N{i},MIN(N{i},O{i})))'
+                    sheet[f"P{i}"] = f'=IF(ISTEXT(N{i}),IF(ISTEXT(O{i}),"No disponible",O{i}),IF(ISTEXT(O{i}),N{i},MIN(M{i}, N{i},O{i})))'
                     sheet[f"S{i}"] = f'=R{i}-Q{i}'
                     sheet[f"T{i}"] = f'=IF(ISERR(P{i}-S{i}), "No Disponible", P{i}-S{i})'
                     sheet[f"U{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE)), "No Disponible", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE))'
 
                     
-                    print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
+                    # print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
 
         # ATM sin número de ticket
         elif(len(numList) == 0 and i != 1):
@@ -213,7 +185,6 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
             sheet[f"L{i}"] = "No Disponible"
             sheet[f"N{i}"] = "No Disponible"
             sheet[f"O{i}"] = "No Disponible"
-
 
         i += 1
 
@@ -271,7 +242,6 @@ def selectInputFile(inType):
         ('All files', '*.*')
     )
 
-
     if (inType == "input"):
         inputFilename = fd.askopenfilename(
             title = "Abrir archivo",
@@ -299,9 +269,11 @@ def selectInputFile(inType):
                 showinfo(title = "Error", message = "No se ha seleccionado un archivo de tickets")
 
 
+# Diálogo de "Guardar Como..."
 def saveAs() :
     global inputFilename, outputFilename
 
+    # Si no se ha seleccionado un archivo de entrada, se muestra error y se cierra el diálogo
     if not inputFilename:
         showinfo(title="Error", message="No se ha seleccionado un archivo de entrada.")
         return
@@ -334,7 +306,6 @@ window = tk.Tk()
 window.resizable(False, False)
 window.title("AutoMultas")
 window.geometry("400x400")
-# frame = tk.Frame(master=window, width=300, height=250, border=2, background= "yellow").pack()
 
 ticketsFilename = ""
 inputFilename = ""
