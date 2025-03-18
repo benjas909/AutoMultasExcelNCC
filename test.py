@@ -14,7 +14,9 @@ DEFAULT_DIR = "."
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
+# Activa la opción de importar tickets al seleccionar la casilla correspondiente.
 def activator():
+
     if check.get() == 1:
         importButton.config(state="normal")
     else:
@@ -22,12 +24,30 @@ def activator():
 
 
 def copySheet(sourceSheet, targetSheet):
+    """
+    Copia por completo una hoja.
+
+    args:
+        sourceSheet(object): Hoja de origen a copiar.
+        targetSheet(object): Hoja de destino a pegar.
+    
+    Función extraída de StackOverflow https://stackoverflow.com/a/68800310
+    """
     copyCells(sourceSheet, targetSheet)
     copySheetAttributes(sourceSheet, targetSheet)
 
 
-# Función extraída de StackOverflow https://stackoverflow.com/a/68800310
+
 def copyCells(sourceSheet, targetSheet):
+    """
+    Copia contenidos y estilos de cada celda de una hoja
+
+    args:
+        sourceSheet(object): Hoja de origen de las celdas.
+        targetSheet(object): Hoja de destino de las celdas.
+
+    Función extraída de StackOverflow https://stackoverflow.com/a/68800310
+    """    
     for (row, col), sourceCell in sourceSheet._cells.items():
         targetCell = targetSheet.cell(column=col, row=row)
 
@@ -49,8 +69,16 @@ def copyCells(sourceSheet, targetSheet):
             targetCell.comment = copy(sourceCell.comment)
             
 
-# Función extraída de StackOverflow: https://stackoverflow.com/a/68800310
 def copySheetAttributes(sourceSheet, targetSheet):
+    """
+    Copia atributos de una hoja.
+
+    args:
+        sourceSheet(object): Hoja de origen a copiar.
+        targetSheet(object): Hoja de destino a pegar.
+
+    Función extraída de StackOverflow: https://stackoverflow.com/a/68800310
+    """
     targetSheet.sheet_format = copy(sourceSheet.sheet_format)
     targetSheet.sheet_properties = copy(sourceSheet.sheet_properties)
     targetSheet.merged_cells = copy(sourceSheet.merged_cells)
@@ -77,7 +105,14 @@ def copySheetAttributes(sourceSheet, targetSheet):
 
 
 def XLSXHandling(ticketsFilename, inFilename, outFilename):
+    """
+    Realiza la manipulación de las planillas xlsx.
 
+    args:
+        ticketsFilename(str): Nombre del archivo xlsx que contiene la información de tickets.
+        inFilename(str): Nombre del archivo xlsx con información de multas.
+        outFilename(str): Nombre de archivo de salida.
+    """
     workbook = openpyxl.load_workbook(filename=inFilename)
     if (ticketsFilename != ""):
         targetSheet = workbook.create_sheet("Tickets")
@@ -106,6 +141,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     headerFill = PatternFill(start_color=cyan, end_color=cyan, fill_type="solid")
     centerAlign = Alignment(horizontal="center", vertical="center")
 
+    # Header titles
     sheet["J1"] = "Apertura"
     sheet["K1"] = "Resuelto"
     sheet["L1"] = "Cerrado"
@@ -119,6 +155,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     sheet["T1"] = "Tiempo Indisponibilidad GTD"
     sheet["U1"] = "Responsable"
 
+    # Header styling 
     for letter in ALPHABET:
         if letter > 'I' and letter < 'V':
             sheet[f"{letter}1"].fill = headerFill
@@ -130,6 +167,7 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     addedCells = 0
     for row in contents:
 
+        # Deja de leer al pasar del último ATM
         if (row[0].value is None):
             break
 
@@ -154,7 +192,6 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
                 # Guarda datos de ATM actual
                 ATM = row[0].value
                 Comuna = row[1].value
-                # Apertura = row[10].value
 
                 # Recorre lista de tickets, desde el segundo ticket
                 for item in numList[1:]:
@@ -175,8 +212,6 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
                     sheet[f"T{i}"] = f'=IF(ISERR(P{i}-S{i}), "No Disponible", P{i}-S{i})'
                     sheet[f"U{i}"] = f'=IF(ISNA(VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE)), "No Disponible", VLOOKUP(C{i},Tickets!$A$2:$X${tickMax},15,FALSE))'
 
-                    
-                    # print(ATM, "|", Comuna, "|", newNum, "|", Apertura)
 
         # ATM sin número de ticket
         elif(len(numList) == 0 and i != 1):
@@ -190,11 +225,12 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
 
     sheet[f"I{lastTicket + addedCells + 3}"] = f'=SUM(I2:I{lastTicket + addedCells})'
 
-
+    # Junta las columnas que tienen formato de fecha
     dateCells1 = sheet[ f'J1:M{lastTicket + addedCells + 3}' ]
     dateCells2 = sheet[ f'Q1:R{lastTicket + addedCells + 3}' ]
     dateCellsJoin = [dateCells1, dateCells2]
 
+    # Junta las columnas que tienen formato de hora
     timeCells1 = sheet[ f"N1:P{lastTicket + addedCells + 3}" ]
     timeCells2 = sheet[ f"S1:U{lastTicket + addedCells + 3}" ]
     timeCellsJoin = [timeCells1, timeCells2]
@@ -233,8 +269,13 @@ def XLSXHandling(ticketsFilename, inFilename, outFilename):
     showinfo(title="Listo", message="Archivo guardado")
 
 
-# Ventana de selección de archivo
 def selectInputFile(inType):
+    """
+    Ventana emergente para selección de archivos.
+
+    args:
+        inType(str): Tipo de archivo a abrir ("multas" o "tickets). 
+    """
 
     global inputFilename, ticketsFilename
     filetypes = (
@@ -242,7 +283,7 @@ def selectInputFile(inType):
         ('All files', '*.*')
     )
 
-    if (inType == "input"):
+    if (inType == "multas"):
         inputFilename = fd.askopenfilename(
             title = "Abrir archivo",
             initialdir=DEFAULT_DIR,
@@ -251,7 +292,7 @@ def selectInputFile(inType):
         if inputFilename:
             showinfo(title="Archivo seleccionado", message=inputFilename)
             if hasattr(window, "label_infile"):
-                window.label_infile.config(text="Archivo de entrada: " + inputFilename)
+                window.label_infile.config(text="Archivo de multas: " + inputFilename)
         else:
             showinfo(title="Error", message="No se ha seleccionado ningún archivo")
 
@@ -269,13 +310,15 @@ def selectInputFile(inType):
                 showinfo(title = "Error", message = "No se ha seleccionado un archivo de tickets")
 
 
-# Diálogo de "Guardar Como..."
 def saveAs() :
+    """
+    Ventana emergente para selección de ubicación de destino y nombre de archivo de salida.
+    """
     global inputFilename, outputFilename
 
     # Si no se ha seleccionado un archivo de entrada, se muestra error y se cierra el diálogo
     if not inputFilename:
-        showinfo(title="Error", message="No se ha seleccionado un archivo de entrada.")
+        showinfo(title="Error", message="No se ha seleccionado un archivo de multas.")
         return
 
     baseName = os.path.splitext(os.path.basename(inputFilename))[0]
@@ -311,30 +354,36 @@ ticketsFilename = ""
 inputFilename = ""
 outputFilename = ""
 
-
+# Frame de importación de tickets
 impFrame = tk.Frame(master=window, width=450, height=150, bd=4, relief=tk.RAISED)
 impFrame.pack(pady=5)
 
+# Checkbox de activación de botón de importe de tickets
 check = tk.IntVar()
 importCheck = ttk.Checkbutton(impFrame, text="Importar tickets", variable=check, onvalue=1, offvalue=0, command=activator)
 importCheck.pack(pady=5)
 
+# Label de nombre de archivo de tickets y botón de importe  
 window.label_tickfile = tk.Label(impFrame, text="", wraplength=300)
 window.label_tickfile.pack()
 importButton = ttk.Button(master=impFrame, text="Abrir archivo de tickets", command= lambda: selectInputFile("tickets"), state="disabled")
 importButton.pack(padx=10, pady=5)
 
+# Frame de apertura de archivo de multas
 openFrame = tk.Frame(master=window, width=450, height=100, bd=4, relief=tk.RAISED)
 openFrame.pack(pady=5)
 
-window.label_infile = tk.Label(openFrame, text="No se ha seleccionado un archivo de entrada", wraplength=300)
+# Label de nombre de archivo y botón de abrir archivo
+window.label_infile = tk.Label(openFrame, text="No se ha seleccionado un archivo de multas", wraplength=300)
 window.label_infile.pack()
-openButton = ttk.Button(master=openFrame, text="Abrir un archivo", command= lambda: selectInputFile("input"))
+openButton = ttk.Button(master=openFrame, text="Abrir un archivo de multas", command= lambda: selectInputFile("multas"))
 openButton.pack(pady=10)
 
+# Frame de guardado de archivo
 saveFrame = tk.Frame(master=window, width=450, height=100, bd=4, relief=tk.RAISED)
 saveFrame.pack()
 
+# Label de nombre de archivo y botón de "Guardar Como..."
 window.label_outfile = tk.Label(saveFrame, text="No se ha seleccionado un nombre de archivo de salida", wraplength=300)
 window.label_outfile.pack()
 saveButton = ttk.Button(master=saveFrame, text="Guardar archivo", command=saveAs)
@@ -342,6 +391,5 @@ saveButton.pack(pady=10)
 
 
 window.mainloop()
-print(inputFilename)
 
 

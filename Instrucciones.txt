@@ -32,3 +32,5 @@ Desarrollado en Python 3.13, Windows 10 Enterprise 22H2
 - Además, se debe seleccionar el archivo de multas y la ubicación y nombre del archivo de salida del programa.
 
 - Cuando aparezca el mensaje de "Archivo Guardado", el archivo estará listo para abrir en la ubicación elegida.
+
+
