@@ -20,7 +20,7 @@ Las instrucciones para su instalación se muestran a continuación.
     - En la carpeta, en un espacio vacío, hacer click derecho y elegir, "Abrir en Terminal"
     - En caso de que no aparezca esta opción, hacer Shift + Click derecho y seleccionar "Abrir la ventana de PowerShell aquí".
 
-3. Ejecutar el comando "pip --version", si se muestra alguna versión, puedes saltarte al paso 6.
+3. Ejecutar el comando "pip --version", si se muestra alguna versión, puedes saltarte al paso 5.
 
 4. Ejecutar el comando "python ./get-pip.py" en powershell, esperar a que finalice
     - En caso de que algún comando que comience con "python" no funcione, probar reemplazando con "python3", en caso de que no funcione, probar a reinstalar python.

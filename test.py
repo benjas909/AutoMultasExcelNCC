@@ -343,7 +343,7 @@ def saveAs() :
         showinfo(title="Error", message="No se ha seleccionado un nombre de salida")
 
 
-
+############# INTERFAZ #############
 # Ventana principal
 window = tk.Tk()
 window.resizable(False, False)
@@ -391,5 +391,7 @@ saveButton.pack(pady=10)
 
 
 window.mainloop()
+
+############# INTERFAZ #############
 
 
